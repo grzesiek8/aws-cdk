@@ -1,0 +1,874 @@
+{
+  "Resources": {
+    "SimpleLambdaWidgetStoreDC790213": {
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/WidgetStore/Resource"
+      }
+    },
+    "SimpleLambdaWidgetHandlerServiceRole3E339FF5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/WidgetHandler/ServiceRole/Resource"
+      }
+    },
+    "SimpleLambdaWidgetHandlerServiceRoleDefaultPolicyAB7FE9CD": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject*",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SimpleLambdaWidgetStoreDC790213",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SimpleLambdaWidgetStoreDC790213",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SimpleLambdaWidgetHandlerServiceRoleDefaultPolicyAB7FE9CD",
+        "Roles": [
+          {
+            "Ref": "SimpleLambdaWidgetHandlerServiceRole3E339FF5"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/WidgetHandler/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SimpleLambdaWidgetHandler479983D2": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParametersf3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707bS3Bucket4ED863D3"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersf3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707bS3VersionKeyCA5A5D9F"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersf3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707bS3VersionKeyCA5A5D9F"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Handler": "widgets.main",
+        "Role": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandlerServiceRole3E339FF5",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs10.x",
+        "Environment": {
+          "Variables": {
+            "BUCKET": {
+              "Ref": "SimpleLambdaWidgetStoreDC790213"
+            }
+          }
+        }
+      },
+      "DependsOn": [
+        "SimpleLambdaWidgetHandlerServiceRoleDefaultPolicyAB7FE9CD",
+        "SimpleLambdaWidgetHandlerServiceRole3E339FF5"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/WidgetHandler/Resource",
+        "aws:asset:path": "asset.f3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707b",
+        "aws:asset:property": "Code"
+      }
+    },
+    "SimpleLambdaWidgetsAPI1C7C98E9": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Description": "This service services widgets.",
+        "Name": "Widget Service"
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Resource"
+      }
+    },
+    "SimpleLambdaWidgetsAPICloudWatchRole39434247": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/CloudWatchRole/Resource"
+      }
+    },
+    "SimpleLambdaWidgetsAPIAccountD1CA0DD8": {
+      "Type": "AWS::ApiGateway::Account",
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetsAPICloudWatchRole39434247",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "SimpleLambdaWidgetsAPI1C7C98E9"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Account"
+      }
+    },
+    "SimpleLambdaWidgetsAPIDeployment8DD233D7c03e3f99a18781305801419f9b896969": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+        },
+        "Description": "Automatically created by the RestApi construct"
+      },
+      "DependsOn": [
+        "SimpleLambdaWidgetsAPIDELETED9A6E507",
+        "SimpleLambdaWidgetsAPIGETB7C5D448",
+        "SimpleLambdaWidgetsAPIPOST0A82C0EF"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Deployment/Resource"
+      }
+    },
+    "SimpleLambdaWidgetsAPIDeploymentStageprod8E165B2B": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+        },
+        "DeploymentId": {
+          "Ref": "SimpleLambdaWidgetsAPIDeployment8DD233D7c03e3f99a18781305801419f9b896969"
+        },
+        "StageName": "prod"
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/DeploymentStage.prod/Resource"
+      }
+    },
+    "SimpleLambdaWidgetsAPIPOSTApiPermissionCdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3POSTCC9D19EA": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandler479983D2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+              },
+              "/",
+              {
+                "Ref": "SimpleLambdaWidgetsAPIDeploymentStageprod8E165B2B"
+              },
+              "/POST/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/POST/ApiPermission.CdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3.POST.."
+      }
+    },
+    "SimpleLambdaWidgetsAPIPOSTApiPermissionTestCdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3POST270BA68F": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandler479983D2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+              },
+              "/test-invoke-stage/POST/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/POST/ApiPermission.Test.CdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3.POST.."
+      }
+    },
+    "SimpleLambdaWidgetsAPIPOST0A82C0EF": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "POST",
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetsAPI1C7C98E9",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "SimpleLambdaWidgetHandler479983D2",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/POST/Resource"
+      }
+    },
+    "SimpleLambdaWidgetsAPIGETApiPermissionCdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3GET5554F14B": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandler479983D2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+              },
+              "/",
+              {
+                "Ref": "SimpleLambdaWidgetsAPIDeploymentStageprod8E165B2B"
+              },
+              "/GET/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/GET/ApiPermission.CdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3.GET.."
+      }
+    },
+    "SimpleLambdaWidgetsAPIGETApiPermissionTestCdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3GET26C41170": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandler479983D2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+              },
+              "/test-invoke-stage/GET/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/GET/ApiPermission.Test.CdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3.GET.."
+      }
+    },
+    "SimpleLambdaWidgetsAPIGETB7C5D448": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetsAPI1C7C98E9",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "SimpleLambdaWidgetHandler479983D2",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/GET/Resource"
+      }
+    },
+    "SimpleLambdaWidgetsAPIDELETEApiPermissionCdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3DELETE0D73E2E9": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandler479983D2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+              },
+              "/",
+              {
+                "Ref": "SimpleLambdaWidgetsAPIDeploymentStageprod8E165B2B"
+              },
+              "/DELETE/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/DELETE/ApiPermission.CdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3.DELETE.."
+      }
+    },
+    "SimpleLambdaWidgetsAPIDELETEApiPermissionTestCdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3DELETED25DAEC7": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetHandler479983D2",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+              },
+              "/test-invoke-stage/DELETE/"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/DELETE/ApiPermission.Test.CdoLambdaStack2SimpleLambdaWidgetsAPIF1C637E3.DELETE.."
+      }
+    },
+    "SimpleLambdaWidgetsAPIDELETED9A6E507": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "DELETE",
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "SimpleLambdaWidgetsAPI1C7C98E9",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+        },
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "SimpleLambdaWidgetHandler479983D2",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/SimpleLambda/Widgets-API/Default/DELETE/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Modules": "aws-cdk=1.65.0,@aws-cdk/assets=1.65.0,@aws-cdk/aws-apigateway=1.65.0,@aws-cdk/aws-applicationautoscaling=1.65.0,@aws-cdk/aws-autoscaling-common=1.65.0,@aws-cdk/aws-certificatemanager=1.65.0,@aws-cdk/aws-cloudwatch=1.65.0,@aws-cdk/aws-codeguruprofiler=1.65.0,@aws-cdk/aws-ec2=1.65.0,@aws-cdk/aws-efs=1.65.0,@aws-cdk/aws-elasticloadbalancingv2=1.65.0,@aws-cdk/aws-events=1.65.0,@aws-cdk/aws-iam=1.65.0,@aws-cdk/aws-kms=1.65.0,@aws-cdk/aws-lambda=1.65.0,@aws-cdk/aws-logs=1.65.0,@aws-cdk/aws-route53=1.65.0,@aws-cdk/aws-s3=1.65.0,@aws-cdk/aws-s3-assets=1.65.0,@aws-cdk/aws-sqs=1.65.0,@aws-cdk/aws-ssm=1.65.0,@aws-cdk/cloud-assembly-schema=1.65.0,@aws-cdk/core=1.65.0,@aws-cdk/cx-api=1.65.0,@aws-cdk/region-info=1.65.0,jsii-runtime=Java/1.8.0_241"
+      },
+      "Metadata": {
+        "aws:cdk:path": "CdoLambdaStack2/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Outputs": {
+    "SimpleLambdaWidgetsAPIEndpointCFDF9171": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "SimpleLambdaWidgetsAPI1C7C98E9"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "SimpleLambdaWidgetsAPIDeploymentStageprod8E165B2B"
+            },
+            "/"
+          ]
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "AssetParametersf3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707bS3Bucket4ED863D3": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"f3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707b\""
+    },
+    "AssetParametersf3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707bS3VersionKeyCA5A5D9F": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"f3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707b\""
+    },
+    "AssetParametersf3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707bArtifactHashA1F42FD2": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"f3965e942a1cc9329afeef432cdbc7717852ea0e512d9a1bfbbd6c69a35f707b\""
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
