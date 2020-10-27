@@ -39,6 +39,7 @@ class AppConstruct(scope: Construct, id: String) : Construct(scope, id) {
                 .timeout(Duration.minutes(5))
                 .build())
 
+        
         val restApi = RestApi(this, "API", RestApiProps.builder()
                 .restApiName("Lambda API!")
                 .build())
